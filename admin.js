@@ -2,7 +2,7 @@
  * PENTING: ISI SCRIPT_URL DI BAWAH INI DENGAN URL DEPLOY ANDA
  * (Contoh: https://script.google.com/macros/s/AKfycby.../exec)
  * ========================================================== */
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbycuxXqkwe4Hd_EmwJzu0Ul33NmHIvBFOGlD9njytqYZ4zY3aZhOK877Jz9nOkoMSf9/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby4Z0HvMZbqOsRFI1NFJPCYZxWfGwABPZfCzlaIrk5Vb-5DIxAMCT8ddwPNEB0zYN370A/exec";
 
 // URL CSV Publik
 const SPREADSHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT_bJRwlJa2CUp2v_qpDLl-aeVre8-LxnXJ5U6kxLyo2UuZEUrpYNqyBX7Z5wcEj9IIDhE4tm4tyfFl/pub?output=csv";
