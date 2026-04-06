@@ -1,36 +1,44 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const folderGrid = document.getElementById('folderGrid');
-    const searchInput = document.getElementById('searchInput');
-    const detailView = document.getElementById('detailView');
-    const backBtn = document.getElementById('backBtn');
-    const detailCode = document.getElementById('detailCode');
-    const detailTitle = document.getElementById('detailTitle');
-    const productList = document.getElementById('productList');
+    const folderGrid      = document.getElementById('folderGrid');
+    const searchInput     = document.getElementById('searchInput');
+    const detailView      = document.getElementById('detailView');
+    const backBtn         = document.getElementById('backBtn');
+    const detailCode      = document.getElementById('detailCode');
+    const detailTitle     = document.getElementById('detailTitle');
+    const productList     = document.getElementById('productList');
 
-    // Product Modal Elements
     const productModalOverlay = document.getElementById('productModalOverlay');
-    const closeProductBtn = document.getElementById('closeProductBtn');
-    const pmBody = document.getElementById('pmBody');
-    const pmFooter = document.getElementById('pmFooter');
+    const closeProductBtn     = document.getElementById('closeProductBtn');
+    const pmBody              = document.getElementById('pmBody');
+    const pmFooter            = document.getElementById('pmFooter');
 
-    let foldersData = [];
-    let currentFolder = null;
+    let foldersData    = [];
+    let currentFolder  = null;
     let currentProduct = null;
 
     const SPREADSHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT_bJRwlJa2CUp2v_qpDLl-aeVre8-LxnXJ5U6kxLyo2UuZEUrpYNqyBX7Z5wcEj9IIDhE4tm4tyfFl/pub?output=csv";
 
-    // Load Data using PapaParse
+    // ─── Image Fallback Helper ─────────────────────────────────────────────────
+    const FALLBACK_SVG = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3 16.5V7.125A2.625 2.625 0 015.625 4.5h12.75A2.625 2.625 0 0121 7.125V16.5m-6-9h.008v.008H15V7.5z" />
+    </svg>`;
+
+    function makeImgWithFallback(src, alt, cssClass, fallbackClass) {
+        if (!src) {
+            return `<div class="${fallbackClass}">${FALLBACK_SVG}</div>`;
+        }
+        return `<img src="${src}" alt="${alt}" class="${cssClass}" loading="lazy" onerror="this.outerHTML='<div class=\\'${fallbackClass}\\'>${FALLBACK_SVG.replace(/"/g, '\\'')}</div>'">`;
+    }
+
+    // ─── Load Data ─────────────────────────────────────────────────────────────
     Papa.parse(SPREADSHEET_CSV_URL, {
         download: true,
         header: true,
         skipEmptyLines: true,
         beforeFirstChunk: function(chunk) {
-            // Memotong baris judul excel (seperti DATA PRODUK AFFILIATE) agar Header tabel aslinya terbaca
             let lines = chunk.split('\n');
             let headerIndex = lines.findIndex(line => line.toLowerCase().includes('nama produk'));
-            if (headerIndex !== -1) {
-                return lines.slice(headerIndex).join('\n');
-            }
+            if (headerIndex !== -1) return lines.slice(headerIndex).join('\n');
             return chunk;
         },
         complete: function(results) {
@@ -38,37 +46,29 @@ document.addEventListener('DOMContentLoaded', () => {
         },
         error: function(err) {
             console.error('Error parsing CSV:', err);
-            folderGrid.innerHTML = '<div class="empty-state">Gagal memuat data dari Spreadsheet. Periksa koneksi internet Anda.</div>';
+            folderGrid.innerHTML = '<div class="empty-state">⚠️ Gagal memuat data.<p>Periksa koneksi internet Anda.</p></div>';
         }
     });
 
     function processSpreadsheetData(rows) {
         const foldersMap = {};
-        let folderCount = 1;
+        let folderCount  = 1;
 
         rows.forEach((row, index) => {
-            // Ignore empty products
             if (!row['Nama Produk'] || row['Nama Produk'].trim() === '') return;
-            // Only process active items (assuming you might set Status to 'Aktif' or empty)
+
             const status = row['Status'] ? row['Status'].toLowerCase().trim() : 'aktif';
             if (status !== 'aktif' && status !== '') return;
 
             const kategori = row['Kategori'] ? row['Kategori'].trim() : 'Uncategorized';
-            
+
             if (!foldersMap[kategori]) {
-                // Determine a code if the admin typed "0675 Fashion Pria"
-                let codeMatch = kategori.match(/^(\d+)/);
+                let codeMatch    = kategori.match(/^(\d+)/);
                 let generatedCode = codeMatch ? codeMatch[1] : `KAT${folderCount.toString().padStart(3, '0')}`;
-                
-                foldersMap[kategori] = {
-                    code: generatedCode,
-                    title: kategori,
-                    products: []
-                };
+                foldersMap[kategori] = { code: generatedCode, title: kategori, products: [] };
                 folderCount++;
             }
 
-            // Convert string price "150.000" or empty to proper format
             let fPrice = row['Harga Jual (Rp)'] ? row['Harga Jual (Rp)'].trim() : '';
             fPrice = fPrice ? (fPrice.toLowerCase().startsWith('rp') ? fPrice : `Rp ${fPrice}`) : '';
 
@@ -78,37 +78,36 @@ document.addEventListener('DOMContentLoaded', () => {
             let fDiscount = row['Diskon (%)'] ? row['Diskon (%)'].trim() : '';
             if (fDiscount && !fDiscount.includes('%')) fDiscount += '%';
 
-            let soldL = row['Label Terjual'] ? row['Label Terjual'].trim() : '';
+            let soldL   = row['Label Terjual'] ? row['Label Terjual'].trim() : '';
             let ratingL = row['Rating'] ? row['Rating'].trim() : '';
-            // Some spreadsheets might use comma for decimals
-            if(ratingL) ratingL = ratingL.replace(',', '.');
+            if (ratingL) ratingL = ratingL.replace(',', '.');
 
-            const p = {
-                id: `scsv_${index}`,
-                name: row['Nama Produk'].trim(),
-                image: row['URL Gambar'] ? row['URL Gambar'].trim() : '',
-                price: fPrice,
+            foldersMap[kategori].products.push({
+                id:            `scsv_${index}`,
+                name:          row['Nama Produk'].trim(),
+                image:         row['URL Gambar'] ? row['URL Gambar'].trim() : '',
+                price:         fPrice,
                 originalPrice: fOrig,
-                discount: fDiscount,
-                soldCount: soldL,
-                rating: ratingL,
-                description: row['Deskripsi'] ? row['Deskripsi'].trim() : '',
-                shopeeLink: row['Link Shopee'] ? row['Link Shopee'].trim() : '#'
-            };
-
-            foldersMap[kategori].products.push(p);
+                discount:      fDiscount,
+                soldCount:     soldL,
+                rating:        ratingL,
+                description:   row['Deskripsi'] ? row['Deskripsi'].trim() : '',
+                shopeeLink:    row['Link Shopee'] ? row['Link Shopee'].trim() : '#'
+            });
         });
 
         foldersData = Object.values(foldersMap);
         renderFolders(foldersData);
+        handleHashOnLoad();
     }
 
-    // Render Folders
+    // ─── Render Folders ────────────────────────────────────────────────────────
     function renderFolders(folders) {
         folderGrid.innerHTML = '';
+        folderGrid.className = 'folder-grid'; // Reset to grid mode
 
         if (folders.length === 0) {
-            folderGrid.innerHTML = '<div class="empty-state">Tidak ada folder yang ditemukan.</div>';
+            folderGrid.innerHTML = '<div class="empty-state">Tidak ada kategori ditemukan.</div>';
             return;
         }
 
@@ -122,7 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             for (let i = 0; i < 4; i++) {
                 if (previewImages[i]) {
-                    gridHTML += `<img src="${previewImages[i]}" alt="Preview" class="folder-preview-item" loading="lazy">`;
+                    gridHTML += `<img src="${previewImages[i]}" alt="Preview" class="folder-preview-item" loading="lazy" onerror="this.style.display='none'">`;
                 } else {
                     gridHTML += `<div class="folder-empty-slot"></div>`;
                 }
@@ -140,29 +139,87 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Search Functionality
+    // ─── Search — folders + produk ─────────────────────────────────────────────
     searchInput.addEventListener('input', (e) => {
-        const searchTerm = e.target.value.trim().toLowerCase();
+        const q = e.target.value.trim().toLowerCase();
 
-        if (searchTerm === '') {
+        if (q === '') {
             renderFolders(foldersData);
             return;
         }
 
-        const filtered = foldersData.filter(folder =>
-            folder.code.toLowerCase().includes(searchTerm) || 
-            folder.title.toLowerCase().includes(searchTerm)
+        // Cek apakah ada produk yang cocok
+        const productMatches = [];
+        foldersData.forEach(folder => {
+            folder.products.forEach(p => {
+                if (p.name.toLowerCase().includes(q) || folder.title.toLowerCase().includes(q) || folder.code.toLowerCase().includes(q)) {
+                    productMatches.push({ product: p, folder });
+                }
+            });
+        });
+
+        // Jika query sangat pendek (1-2 huruf), cukup filter folder
+        const folderMatches = foldersData.filter(f =>
+            f.code.toLowerCase().includes(q) || f.title.toLowerCase().includes(q)
         );
 
-        renderFolders(filtered);
+        if (q.length <= 2) {
+            renderFolders(folderMatches);
+            return;
+        }
+
+        // Prioritas: folder exact match → product matches
+        if (folderMatches.length > 0 && productMatches.length === 0) {
+            renderFolders(folderMatches);
+        } else {
+            renderSearchResults(productMatches, q);
+        }
     });
 
-    // Open Folder Detail
+    function renderSearchResults(matches, q) {
+        folderGrid.innerHTML = '';
+        folderGrid.className = 'folder-grid'; // tetap di container yang sama
+
+        if (matches.length === 0) {
+            folderGrid.innerHTML = `<div class="empty-state">Tidak ada hasil untuk "<strong>${q}</strong>".<p>Coba kata kunci lain.</p></div>`;
+            return;
+        }
+
+        const wrapper = document.createElement('div');
+        wrapper.className = 'search-results-list';
+        wrapper.style.cssText = 'grid-column: 1/-1';
+
+        matches.forEach(({ product, folder }, i) => {
+            const item = document.createElement('div');
+            item.className = 'search-result-item animate-fade-in';
+            item.style.animationDelay = `${i * 0.04}s`;
+
+            item.innerHTML = `
+                ${makeImgWithFallback(product.image, product.name, 'search-result-img', 'product-img-fallback')}
+                <div class="search-result-info">
+                    <div class="search-result-name">${product.name}</div>
+                    <div class="search-result-cat">${folder.title}</div>
+                </div>
+                <div class="search-result-price">${product.price}</div>
+            `;
+
+            item.addEventListener('click', () => {
+                openFolder(folder);
+                setTimeout(() => openProductModal(product), 350);
+            });
+
+            wrapper.appendChild(item);
+        });
+
+        folderGrid.appendChild(wrapper);
+    }
+
+    // ─── Open Folder Detail ────────────────────────────────────────────────────
     function openFolder(folder) {
         currentFolder = folder;
-        detailCode.textContent = `#${folder.code}`;
+        detailCode.textContent  = `#${folder.code}`;
         detailTitle.textContent = folder.title;
-        productList.innerHTML = '';
+        productList.innerHTML   = '';
 
         folder.products.forEach((product, index) => {
             const pCard = document.createElement('div');
@@ -170,7 +227,7 @@ document.addEventListener('DOMContentLoaded', () => {
             pCard.style.animationDelay = `${index * 0.05}s`;
 
             pCard.innerHTML = `
-                <img src="${product.image}" alt="${product.name}" class="product-image" loading="lazy">
+                ${makeImgWithFallback(product.image, product.name, 'product-image', 'product-img-fallback')}
                 <div class="product-info">
                     <div class="product-name">${product.name}</div>
                     <div class="product-price">${product.price}</div>
@@ -183,7 +240,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         detailView.classList.add('active');
         document.body.style.overflow = 'hidden';
-
         window.history.pushState({ view: 'folder', code: folder.code }, '', `#${folder.code}`);
     }
 
@@ -197,40 +253,30 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     backBtn.addEventListener('click', () => {
-        if (window.history.state && window.history.state.view === 'folder') {
-            window.history.back();
-        } else {
-            closeFolder();
-        }
+        if (window.history.state?.view === 'folder') window.history.back();
+        else closeFolder();
     });
 
-    // Open Product Modal
+    // ─── Product Modal ─────────────────────────────────────────────────────────
     function openProductModal(product) {
         currentProduct = product;
-        
+
         let badgesHTML = '';
-        if (product.discount) {
-            badgesHTML += `<span class="pm-badge pm-badge-discount">${product.discount}</span>`;
-        }
-        if (product.soldCount) {
-            badgesHTML += `<span class="pm-badge pm-badge-sold">${product.soldCount}</span>`;
-        }
-        if (product.rating && product.rating != "NaN") {
-            badgesHTML += `
-                <span class="pm-badge pm-badge-rating">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width:12px;height:12px;">
-                      <path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clip-rule="evenodd" />
-                    </svg>
-                    ${product.rating}
-                </span>`;
+        if (product.discount)  badgesHTML += `<span class="pm-badge pm-badge-discount">${product.discount}</span>`;
+        if (product.soldCount) badgesHTML += `<span class="pm-badge pm-badge-sold">${product.soldCount}</span>`;
+        if (product.rating && product.rating !== 'NaN') {
+            badgesHTML += `<span class="pm-badge pm-badge-rating">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" style="width:12px;height:12px;">
+                    <path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" clip-rule="evenodd"/>
+                </svg>
+                ${product.rating}
+            </span>`;
         }
 
         pmBody.innerHTML = `
-            <img src="${product.image}" alt="${product.name}" class="pm-img">
+            ${makeImgWithFallback(product.image, product.name, 'pm-img', 'pm-img-fallback')}
             <div class="pm-details-container">
-                <div class="pm-badges">
-                    ${badgesHTML}
-                </div>
+                <div class="pm-badges">${badgesHTML}</div>
                 <h3 class="pm-name">${product.name}</h3>
                 <div class="pm-price-row">
                     <span class="pm-price">${product.price}</span>
@@ -248,8 +294,11 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
 
         productModalOverlay.classList.add('active');
-        
-        window.history.pushState({ view: 'product', productId: product.id }, '', `#${currentFolder?.code || ''}/p_${product.id}`);
+        window.history.pushState(
+            { view: 'product', productId: product.id },
+            '',
+            `#${currentFolder?.code || ''}/p_${product.id}`
+        );
     }
 
     function closeProductModal() {
@@ -258,55 +307,62 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     closeProductBtn.addEventListener('click', () => {
-        if (window.history.state && window.history.state.view === 'product') {
-            window.history.back();
-        } else {
-            closeProductModal();
-        }
+        if (window.history.state?.view === 'product') window.history.back();
+        else closeProductModal();
     });
 
     productModalOverlay.addEventListener('click', (e) => {
         if (e.target === productModalOverlay) {
-            if (window.history.state && window.history.state.view === 'product') {
-                window.history.back();
-            } else {
-                closeProductModal();
-            }
+            if (window.history.state?.view === 'product') window.history.back();
+            else closeProductModal();
         }
     });
 
+    // ─── Swipe Down to Close Product Modal ────────────────────────────────────
+    let touchStartY = 0;
+    const modalContent = document.getElementById('productModalContent');
+
+    modalContent.addEventListener('touchstart', (e) => {
+        touchStartY = e.touches[0].clientY;
+    }, { passive: true });
+
+    modalContent.addEventListener('touchend', (e) => {
+        const delta = e.changedTouches[0].clientY - touchStartY;
+        if (delta > 80) {
+            if (window.history.state?.view === 'product') window.history.back();
+            else closeProductModal();
+        }
+    }, { passive: true });
+
+    // ─── Pop State ─────────────────────────────────────────────────────────────
     window.addEventListener('popstate', (e) => {
         const state = e.state;
-        
         if (!state) {
             closeProductModal();
             closeFolder();
         } else if (state.view === 'folder') {
             closeProductModal();
-            if(currentFolder) {
-                 detailView.classList.add('active');
-                 document.body.style.overflow = 'hidden';
+            if (currentFolder) {
+                detailView.classList.add('active');
+                document.body.style.overflow = 'hidden';
             }
         }
     });
 
-    setTimeout(() => {
-        if (window.location.hash && foldersData.length > 0) {
-            const hashParts = window.location.hash.substring(1).split('/');
-            const code = hashParts[0];
-            const folder = foldersData.find(f => f.code === code);
-            
-            if (folder) {
-                openFolder(folder);
-                
-                if (hashParts[1] && hashParts[1].startsWith('p_')) {
-                    const pid = hashParts[1].substring(2);
-                    const prod = folder.products.find(p => p.id === pid);
-                    if(prod) {
-                        setTimeout(() => openProductModal(prod), 300);
-                    }
-                }
-            }
+    // ─── Deep Link on Load ─────────────────────────────────────────────────────
+    function handleHashOnLoad() {
+        if (!window.location.hash || foldersData.length === 0) return;
+        const hashParts = window.location.hash.substring(1).split('/');
+        const code      = hashParts[0];
+        const folder    = foldersData.find(f => f.code === code);
+
+        if (!folder) return;
+        openFolder(folder);
+
+        if (hashParts[1]?.startsWith('p_')) {
+            const pid  = hashParts[1].substring(2);
+            const prod = folder.products.find(p => p.id === pid);
+            if (prod) setTimeout(() => openProductModal(prod), 300);
         }
-    }, 1500);
+    }
 });
