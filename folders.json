@@ -1,164 +1,118 @@
-[
+{
+  "folders": [
     {
-        "code": "0675",
-        "title": "Rekomendasi Outfit Kerja Pria",
-        "products": [
-            {
-                "id": "p1",
-                "name": "Kemeja Putih Premium Oxford",
-                "image": "https://images.unsplash.com/photo-1596755094514-f87e32f85e2c?w=500&q=80",
-                "price": "Rp 99.000",
-                "originalPrice": "Rp 150.000",
-                "discount": "34%",
-                "soldCount": "10RB+ Terjual",
-                "rating": "4.9",
-                "description": "Kemeja bahan oxford premium yang adem, tidak mudah lecek, dan pas menyerap keringat. Sangat cocok untuk dipakai kerja di kantor, meeting, atau acara formal lainnya dengan gaya yang modern.",
-                "shopeeLink": "https://shopee.co.id"
-            },
-            {
-                "id": "p2",
-                "name": "Celana Chino Slim Fit Hitam",
-                "image": "https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?w=500&q=80",
-                "price": "Rp 129.000",
-                "originalPrice": "Rp 200.000",
-                "discount": "35%",
-                "soldCount": "5RB+ Terjual",
-                "rating": "4.8",
-                "description": "Celana chino slim fit dengan bahan katun stretch yang sangat nyaman digunakan seharian. Memberikan look profesional namun tetap luwes bergerak.",
-                "shopeeLink": "https://shopee.co.id"
-            },
-            {
-                "id": "p3",
-                "name": "Sepatu Loafers Kulit Klasik",
-                "image": "https://images.unsplash.com/photo-1614252339460-e1443c223c6f?w=500&q=80",
-                "price": "Rp 185.000",
-                "originalPrice": "Rp 250.000",
-                "discount": "26%",
-                "soldCount": "2RB+ Terjual",
-                "rating": "4.8",
-                "description": "Sepatu pantofel loafers dengan bahan kulit sintetis Grade A. Desain klasik tanpa ribet tali, tinggal slip-on dan siap berangkat kerja dengan percaya diri.",
-                "shopeeLink": "https://shopee.co.id"
-            },
-            {
-                "id": "p4",
-                "name": "Jam Tangan Minimalis",
-                "image": "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&q=80",
-                "price": "Rp 75.000",
-                "originalPrice": "Rp 120.000",
-                "discount": "37%",
-                "soldCount": "1RB+ Terjual",
-                "rating": "4.7",
-                "description": "Jam tangan analog dengan dial simpel minimalis. Strap berbahan faux leather elegan, cocok dipadukan dengan kemeja dan jas.",
-                "shopeeLink": "https://shopee.co.id"
-            }
-        ]
+      "id": "tech-01",
+      "title": "Creator Desk Essentials",
+      "description": "High-performing setup picks for creators and remote workers.",
+      "hidden": false,
+      "products": [
+        {
+          "id": "tech-keyboard-1",
+          "name": "Low-Profile Wireless Keyboard",
+          "image": "https://images.unsplash.com/photo-1541140532154-b024d705b90a?auto=format&fit=crop&w=1200&q=80",
+          "price": "$89",
+          "label": "Best Seller",
+          "description": "Snappy low-latency typing with premium aluminum frame.",
+          "affiliateUrl": "https://example.com/keyboard",
+          "hidden": false
+        },
+        {
+          "id": "tech-light-2",
+          "name": "RGB Edge Desk Light",
+          "image": "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1200&q=80",
+          "price": "$49",
+          "label": "Flash Sale",
+          "description": "Bias lighting that reduces eye strain and upgrades vibe instantly.",
+          "affiliateUrl": "https://example.com/light",
+          "hidden": false
+        },
+        {
+          "id": "tech-stand-3",
+          "name": "Magnetic Phone Stand",
+          "image": "https://images.unsplash.com/photo-1556656793-08538906a9f8?auto=format&fit=crop&w=1200&q=80",
+          "price": "$25",
+          "label": "Top Rated",
+          "description": "Solid aluminum stand with adjustable angle for all-day calls.",
+          "affiliateUrl": "https://example.com/stand",
+          "hidden": false
+        }
+      ]
     },
     {
-        "code": "0676",
-        "title": "Skincare Routine Malam",
-        "products": [
-            {
-                "id": "s1",
-                "name": "Gentle Facial Wash",
-                "image": "https://images.unsplash.com/photo-1556228578-0d85b1a4d571?w=500&q=80",
-                "price": "Rp 45.000",
-                "originalPrice": "Rp 60.000",
-                "discount": "25%",
-                "soldCount": "8RB+ Terjual",
-                "rating": "4.9",
-                "description": "Sabun cuci muka pH balance super gentle, tidak bikin kulit terasa ketarik setelah dibilas. Ampuh bersihkan sisa kotoran seharian.",
-                "shopeeLink": "https://shopee.co.id"
-            },
-            {
-                "id": "s2",
-                "name": "Hydrating Toner Ampoule",
-                "image": "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=500&q=80",
-                "price": "Rp 85.000",
-                "originalPrice": "Rp 100.000",
-                "discount": "15%",
-                "soldCount": "4RB+ Terjual",
-                "rating": "4.8",
-                "description": "Toner hydrating dengan kandungan Hyaluronic Acid tinggi untuk mengembalikan kelembapan kulit secara instan setelah cuci muka.",
-                "shopeeLink": "https://shopee.co.id"
-            },
-            {
-                "id": "s3",
-                "name": "Moisturizer Gel Ringan",
-                "image": "https://images.unsplash.com/photo-1608248593842-8021c618e1cb?w=500&q=80",
-                "price": "Rp 115.000",
-                "originalPrice": "Rp 150.000",
-                "discount": "23%",
-                "soldCount": "6RB+ Terjual",
-                "rating": "4.9",
-                "description": "Pelembap gel yang sangat ringan, cepat menyerap, menenangkan kulit kemerahan, dan mengunci kelembapan selama tidur.",
-                "shopeeLink": "https://shopee.co.id"
-            }
-        ]
+      "id": "beauty-01",
+      "title": "Night Reset Skincare",
+      "description": "Minimal routine picks for clean, hydrated skin overnight.",
+      "hidden": false,
+      "products": [
+        {
+          "id": "beauty-cleanser-1",
+          "name": "Gentle Gel Cleanser",
+          "image": "https://images.unsplash.com/photo-1625772452859-1c03d5bf1137?auto=format&fit=crop&w=1200&q=80",
+          "price": "$18",
+          "label": "Best Seller",
+          "description": "Removes SPF and makeup without stripping the skin barrier.",
+          "affiliateUrl": "https://example.com/cleanser",
+          "hidden": false
+        },
+        {
+          "id": "beauty-serum-2",
+          "name": "Hydrating HA Serum",
+          "image": "https://images.unsplash.com/photo-1611080541599-8c6dbde6ed28?auto=format&fit=crop&w=1200&q=80",
+          "price": "$29",
+          "label": "Editor Pick",
+          "description": "Deep hydration boost for dry, stressed, and tired skin.",
+          "affiliateUrl": "https://example.com/serum",
+          "hidden": false
+        },
+        {
+          "id": "beauty-cream-3",
+          "name": "Barrier Repair Night Cream",
+          "image": "https://images.unsplash.com/photo-1571781926291-c477ebfd024b?auto=format&fit=crop&w=1200&q=80",
+          "price": "$34",
+          "label": "Flash Sale",
+          "description": "Locks in moisture with peptides and ceramides overnight.",
+          "affiliateUrl": "https://example.com/cream",
+          "hidden": false
+        }
+      ]
     },
     {
-        "code": "0677",
-        "title": "Aksesoris Meja Setup Keren",
-        "products": [
-            {
-                "id": "d1",
-                "name": "Mechanical Keyboard Switch Brown",
-                "image": "https://images.unsplash.com/photo-1595225476474-87563907a212?w=500&q=80",
-                "price": "Rp 350.000",
-                "originalPrice": "Rp 499.000",
-                "discount": "30%",
-                "soldCount": "2.5RB+ Terjual",
-                "rating": "4.8",
-                "description": "Keyboard mechanical dengan brown switch yang asik dipakai ngetik tanpa berisik. Full RGB dengan banyak mode lampu, material kokoh.",
-                "shopeeLink": "https://shopee.co.id"
-            },
-            {
-                "id": "d2",
-                "name": "Mouse Wireless Silent",
-                "image": "https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=500&q=80",
-                "price": "Rp 120.000",
-                "originalPrice": "Rp 180.000",
-                "discount": "33%",
-                "soldCount": "12RB+ Terjual",
-                "rating": "4.7",
-                "description": "Mouse tanpa kabel dengan fitur klik yang silent (tidak berisik). Pas di genggaman dan sangat diandalkan buat kerja remote.",
-                "shopeeLink": "https://shopee.co.id"
-            },
-            {
-                "id": "d3",
-                "name": "Desk Mat Kulit Premium",
-                "image": "https://images.unsplash.com/photo-1589781919864-42fcf59ffdf0?w=500&q=80",
-                "price": "Rp 80.000",
-                "originalPrice": "Rp 150.000",
-                "discount": "46%",
-                "soldCount": "4RB+ Terjual",
-                "rating": "4.9",
-                "description": "Alas meja/mousepad besar berbahan PU leather sintetik. Permukaan mulus, anti-air, mudah dibersihkan, dan bikin meja tambah aesthetic.",
-                "shopeeLink": "https://shopee.co.id"
-            },
-            {
-                "id": "d4",
-                "name": "Lampu Meja LED RGB",
-                "image": "https://images.unsplash.com/photo-1510074377623-8cf13fb86c08?w=500&q=80",
-                "price": "Rp 145.000",
-                "originalPrice": "Rp 210.000",
-                "discount": "30%",
-                "soldCount": "3RB+ Terjual",
-                "rating": "4.8",
-                "description": "Lampu LED hemat energi. Cocok untuk penerangan layar/meja agar mata tidak cepat lelah saat kerja malam hari.",
-                "shopeeLink": "https://shopee.co.id"
-            },
-            {
-                "id": "d5",
-                "name": "Stand Handphone Aluminium",
-                "image": "https://images.unsplash.com/photo-1586526848148-be26dd54ce69?w=500&q=80",
-                "price": "Rp 35.000",
-                "originalPrice": "Rp 55.000",
-                "discount": "36%",
-                "soldCount": "20RB+ Terjual",
-                "rating": "4.9",
-                "description": "Holder HP berbahan full aluminium alloy kuat menopang dari HP hingga tablet. Bebas atur angle sesuai pandangan.",
-                "shopeeLink": "https://shopee.co.id"
-            }
-        ]
+      "id": "fashion-01",
+      "title": "Minimal Workwear Capsule",
+      "description": "Sharp essentials for polished office-ready outfits.",
+      "hidden": false,
+      "products": [
+        {
+          "id": "fashion-shirt-1",
+          "name": "Premium Oxford Shirt",
+          "image": "https://images.unsplash.com/photo-1617127365659-c47fa864d8bc?auto=format&fit=crop&w=1200&q=80",
+          "price": "$39",
+          "label": "Top Rated",
+          "description": "Crisp silhouette with breathable cotton for long workdays.",
+          "affiliateUrl": "https://example.com/shirt",
+          "hidden": false
+        },
+        {
+          "id": "fashion-pants-2",
+          "name": "Stretch Chino Pants",
+          "image": "https://images.unsplash.com/photo-1473966968600-fa801b869a1a?auto=format&fit=crop&w=1200&q=80",
+          "price": "$52",
+          "label": "Best Seller",
+          "description": "Tailored comfort fit with wrinkle-resistant finish.",
+          "affiliateUrl": "https://example.com/chino",
+          "hidden": false
+        },
+        {
+          "id": "fashion-shoes-3",
+          "name": "Leather Penny Loafers",
+          "image": "https://images.unsplash.com/photo-1549298916-b41d501d3772?auto=format&fit=crop&w=1200&q=80",
+          "price": "$74",
+          "label": "Limited",
+          "description": "Classic slip-ons with cushioned sole and premium shine.",
+          "affiliateUrl": "https://example.com/loafers",
+          "hidden": false
+        }
+      ]
     }
-]
+  ]
+}

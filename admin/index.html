@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin Dashboard</title>
+  <link rel="stylesheet" href="./admin.css" />
+</head>
+<body>
+  <div class="admin-shell">
+    <header class="admin-top">
+      <div>
+        <p class="eyebrow">Admin</p>
+        <h1>Folder & Product Manager</h1>
+      </div>
+      <div class="admin-actions">
+        <button id="addFolderBtn" class="ghost">Add Folder</button>
+        <button id="addProductBtn" class="primary">Add Product</button>
+        <button id="logoutBtn" class="danger">Logout</button>
+      </div>
+    </header>
+
+    <section id="adminContent" class="admin-content"></section>
+  </div>
+
+  <dialog id="editDialog" class="dialog">
+    <form method="dialog" id="editForm">
+      <h2 id="dialogTitle"></h2>
+      <div id="formFields" class="form-grid"></div>
+      <menu>
+        <button value="cancel" class="ghost" type="button" id="cancelBtn">Cancel</button>
+        <button value="save" class="primary" type="submit">Save</button>
+      </menu>
+    </form>
+  </dialog>
+
+  <script src="./admin.js" defer></script>
+</body>
+</html>
