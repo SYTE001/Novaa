@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentFolder  = null;
     let currentProduct = null;
 
-    const SPREADSHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vT_bJRwlJa2CUp2v_qpDLl-aeVre8-LxnXJ5U6kxLyo2UuZEUrpYNqyBX7Z5wcEj9IIDhE4tm4tyfFl/pub?output=csv";
+    const SPREADSHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRD34qgiaE5rXVFZRweqtjcJMOc4ZoiSp5Xt12jZI5n1_rFEeb6VMVb55VICP84TVXHLFBQaAHGSuJl/pub?output=csv";
 
     // ─── Image Fallback Helper ─────────────────────────────────────────────────
     const FALLBACK_SVG = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
