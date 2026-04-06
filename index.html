@@ -1,94 +1,67 @@
 <!DOCTYPE html>
-<html lang="id">
-
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Novaa — Koleksi Produk Pilihan</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Novaa — Affiliate Folders</title>
+  <meta name="description" content="Modern folder-based affiliate directory." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
 </head>
-
 <body>
-    <div class="app-container">
-        <header>
-            <div class="brand-container">
-                <h1 class="brand">Novaa</h1>
-                <p class="brand-subtitle">Temukan produk favoritmu di sini</p>
-            </div>
-            <div class="search-container">
-                <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                    stroke-width="2" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-                </svg>
-                <input type="text" id="searchInput" placeholder="Cari kategori atau produk..." autocomplete="off">
-            </div>
-        </header>
+  <div class="shell">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">Affiliate Directory</p>
+        <h1>Curated Product Folders</h1>
+      </div>
+      <label class="search-wrap" for="searchInput">
+        <span>⌕</span>
+        <input id="searchInput" type="search" placeholder="Search folders or products…" autocomplete="off" />
+      </label>
+    </header>
 
-        <main>
-            <div class="folder-grid" id="folderGrid">
-                <!-- Skeleton loading cards -->
-                <div class="skeleton-card">
-                    <div class="skeleton-img"></div>
-                    <div class="skeleton-line short"></div>
-                    <div class="skeleton-line"></div>
-                </div>
-                <div class="skeleton-card">
-                    <div class="skeleton-img"></div>
-                    <div class="skeleton-line short"></div>
-                    <div class="skeleton-line"></div>
-                </div>
-                <div class="skeleton-card">
-                    <div class="skeleton-img"></div>
-                    <div class="skeleton-line short"></div>
-                    <div class="skeleton-line"></div>
-                </div>
-                <div class="skeleton-card">
-                    <div class="skeleton-img"></div>
-                    <div class="skeleton-line short"></div>
-                    <div class="skeleton-line"></div>
-                </div>
-            </div>
-        </main>
+    <main>
+      <section id="folderGrid" class="folder-grid" aria-live="polite"></section>
+    </main>
+  </div>
 
-        <!-- Folder Detail View Modal (Level 2) -->
-        <div class="detail-view" id="detailView">
-            <div class="detail-header">
-                <button class="back-btn" id="backBtn" aria-label="Kembali">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5"
-                        stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-                    </svg>
-                </button>
-                <div class="detail-header-info">
-                    <div class="detail-code" id="detailCode">#0000</div>
-                    <div class="detail-title" id="detailTitle">Memuat...</div>
-                </div>
-            </div>
-            <div class="detail-content">
-                <div class="product-list" id="productList"></div>
-            </div>
+  <template id="folderTemplate">
+    <article class="folder-card">
+      <button class="folder-head" type="button">
+        <div>
+          <p class="folder-id"></p>
+          <h2 class="folder-title"></h2>
+          <p class="folder-desc"></p>
         </div>
+        <span class="folder-meta"></span>
+      </button>
+      <div class="product-wrap">
+        <div class="product-grid"></div>
+      </div>
+    </article>
+  </template>
 
-        <!-- Product Detail Modal (Level 3) -->
-        <div class="product-modal-overlay" id="productModalOverlay">
-            <div class="product-modal-content" id="productModalContent">
-                <div class="pm-header">
-                    <button class="pm-close-btn" id="closeProductBtn" aria-label="Tutup">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-                        </svg>
-                    </button>
-                    <div class="pm-title">Detail Produk</div>
-                </div>
-                <div class="pm-body" id="pmBody"></div>
-                <div class="pm-footer" id="pmFooter"></div>
-            </div>
+  <template id="productTemplate">
+    <article class="product-card">
+      <img class="product-image" alt="" loading="lazy" />
+      <div class="product-body">
+        <div class="product-row">
+          <h3 class="product-name"></h3>
+          <span class="product-label"></span>
         </div>
-    </div>
+        <p class="product-price"></p>
+        <p class="product-description"></p>
+        <div class="product-actions">
+          <a class="buy-btn" target="_blank" rel="noopener">Buy Now</a>
+          <button class="copy-btn" type="button">Copy Link</button>
+        </div>
+      </div>
+    </article>
+  </template>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-    <script src="app.js"></script>
+  <script src="app.js" defer></script>
 </body>
-
 </html>

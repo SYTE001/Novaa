@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin Login</title>
+  <link rel="stylesheet" href="./admin.css" />
+</head>
+<body>
+  <main class="login-shell">
+    <form class="login-card" id="loginForm">
+      <p class="eyebrow">Secure Admin</p>
+      <h1>Sign in</h1>
+      <p class="muted">Protected by server-side cookie auth.</p>
+      <label>
+        Password
+        <input id="passwordInput" type="password" required autocomplete="current-password" />
+      </label>
+      <button type="submit" class="primary">Enter Dashboard</button>
+      <p class="error" id="errorText" hidden>Invalid password.</p>
+    </form>
+  </main>
+  <script src="./login.js" defer></script>
+</body>
+</html>
