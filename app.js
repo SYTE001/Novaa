@@ -1,142 +1,169 @@
-const APPS_SCRIPT_URL = localStorage.getItem("novaa_script_url") || "";
+const APPS_SCRIPT_URL = localStorage.getItem("novaa_script_url") || ""; 
+// 👆 Isi string "" di atas dengan URL Apps Script Anda jika admin & halaman depan beda domain
 
 const params = new URLSearchParams(location.search);
+// Default: prefer `folders.json` so preview is consistent across devices (HP/laptop).
+// Opt-in to local draft data (saved by /admin) via `?draft=1` or `localStorage.novaa_prefer_draft=1`.
 const PREFER_LOCAL_DRAFT =
   params.get("draft") === "1" || localStorage.getItem("novaa_prefer_draft") === "1";
 
-const THEME_KEY = "novaa_theme";
-const FAVORITES_KEY = "novaa_favorites";
 
+const CACHE_KEY = "novaa_folders_cache";
+const CACHE_AT_KEY = "novaa_folders_cache_at";
+
+function safeJsonParse(raw) {
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+}
+
+function loadFoldersFromStorage(key) {
+  const raw = localStorage.getItem(key);
+  if (!raw) return null;
+  const parsed = safeJsonParse(raw);
+  return Array.isArray(parsed) ? parsed : null;
+}
+
+function saveFoldersCache(folders) {
+  try {
+    localStorage.setItem(CACHE_KEY, JSON.stringify(folders || []));
+    localStorage.setItem(CACHE_AT_KEY, new Date().toISOString());
+  } catch {
+    // ignore quota / privacy mode
+  }
+}
+
+function firstFulfilled(promises) {
+  return new Promise((resolve, reject) => {
+    let pending = promises.length;
+    const errors = [];
+    if (pending === 0) reject(new Error("No promises"));
+
+    promises.forEach((p, i) => {
+      Promise.resolve(p)
+        .then(resolve)
+        .catch((err) => {
+          errors[i] = err;
+          pending -= 1;
+          if (pending === 0) reject(errors.find(Boolean) || new Error("All failed"));
+        });
+    });
+  });
+}
 const state = {
   folders: [],
   query: "",
   openFolderIds: new Set(),
-  favorites: new Set(JSON.parse(localStorage.getItem(FAVORITES_KEY) || "[]")),
-  showFavorites: false,
+  favorites: new Set(JSON.parse(localStorage.getItem("novaa_favorites") || "[]")),
+  showFavorites: false
 };
+
+const favToggle = document.getElementById("favToggle");
+favToggle.addEventListener("click", () => {
+  state.showFavorites = !state.showFavorites;
+  if (state.showFavorites) favToggle.classList.add("active");
+  else favToggle.classList.remove("active");
+  render();
+});
 
 const folderGrid = document.getElementById("folderGrid");
 const searchInput = document.getElementById("searchInput");
 const folderTpl = document.getElementById("folderTemplate");
 const productTpl = document.getElementById("productTemplate");
-const favToggle = document.getElementById("favToggle");
-const favCount = document.getElementById("favCount");
-const tabAll = document.getElementById("tabAll");
-const tabFav = document.getElementById("tabFav");
-const toast = document.getElementById("toast");
-const backToTop = document.getElementById("backToTop");
-const topbar = document.getElementById("topbar");
-const themeToggle = document.getElementById("themeToggle");
 
-let revealObserver;
-let imageObserver;
-let toastTimeout;
-let lastY = 0;
-let ticking = false;
+searchInput.addEventListener("input", (event) => {
+  state.query = event.target.value.trim().toLowerCase();
+  render();
+});
 
-initTheme();
-bindEvents();
 init();
 
-function bindEvents() {
-  searchInput.addEventListener("input", (event) => {
-    state.query = event.target.value.trim().toLowerCase();
-    renderWithTransition();
-  });
-
-  favToggle.addEventListener("click", () => setFavoritesMode(!state.showFavorites));
-  tabAll.addEventListener("click", () => setFavoritesMode(false));
-  tabFav.addEventListener("click", () => setFavoritesMode(true));
-
-  backToTop.addEventListener("click", () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  });
-
-  window.addEventListener("scroll", onScroll, { passive: true });
-
-  themeToggle.addEventListener("click", () => {
-    const isDark = document.body.classList.toggle("dark");
-    localStorage.setItem(THEME_KEY, isDark ? "dark" : "light");
-    updateThemeToggle(isDark);
-  });
-
-  const media = window.matchMedia("(prefers-color-scheme: dark)");
-  media.addEventListener("change", (event) => {
-    if (localStorage.getItem(THEME_KEY)) return;
-    document.body.classList.toggle("dark", event.matches);
-    updateThemeToggle(event.matches);
-  });
-}
-
-function setFavoritesMode(enabled) {
-  state.showFavorites = enabled;
-  favToggle.classList.toggle("active", enabled);
-  tabFav.classList.toggle("active", enabled);
-  tabAll.classList.toggle("active", !enabled);
-  tabFav.setAttribute("aria-selected", String(enabled));
-  tabAll.setAttribute("aria-selected", String(!enabled));
-  renderWithTransition();
-}
-
 async function init() {
-  renderSkeleton();
-
-  try {
-    const payload = await loadData();
-    state.folders = payload.folders || [];
-    updateFavoriteCounter();
-    render();
+  let hashHydrated = false;
+  const hydrateHashOnce = () => {
+    if (hashHydrated) return;
+    hashHydrated = true;
     hydrateFromHash();
-  } catch (error) {
-    folderGrid.innerHTML = `<div class="empty-state">Gagal memuat produk. Coba refresh halaman.</div>`;
-    console.error(error);
+  };
+
+  // Show something ASAP so skeleton doesn't block buyers (cache / draft).
+  const draftFolders = PREFER_LOCAL_DRAFT ? loadFoldersFromStorage("novaa_folders") : null;
+  const cachedFolders = loadFoldersFromStorage(CACHE_KEY);
+  const fastFolders = (draftFolders && draftFolders.length > 0) ? draftFolders : (cachedFolders && cachedFolders.length > 0 ? cachedFolders : null);
+
+  let lastSignature = "";
+  const applyFolders = (folders, { cache = true } = {}) => {
+    if (!Array.isArray(folders)) return;
+    const signature = JSON.stringify(folders);
+    if (signature === lastSignature) return;
+    lastSignature = signature;
+
+    state.folders = folders;
+    render();
+    hydrateHashOnce();
+    if (cache) saveFoldersCache(folders);
+  };
+
+  if (fastFolders) {
+    applyFolders(fastFolders, { cache: false });
+  } else {
+    renderSkeleton();
   }
-}
 
-async function loadData() {
   try {
-    if (!APPS_SCRIPT_URL) throw new Error("missing-url");
-    const response = await fetch(APPS_SCRIPT_URL, { cache: "no-store" });
-    if (!response.ok) throw new Error(`Failed: ${response.status}`);
-    return await response.json();
-  } catch {
-    const localData = localStorage.getItem("novaa_folders");
-    if (PREFER_LOCAL_DRAFT && localData) {
-      return { folders: JSON.parse(localData) };
+    // If user explicitly wants draft, don't override with remote data.
+    if (PREFER_LOCAL_DRAFT && draftFolders && draftFolders.length > 0) return;
+
+    const fetchFoldersJson = async () => {
+      const res = await fetch("/folders.json"); // allow browser/edge cache for speed
+      if (!res.ok) throw new Error("Unable to load fallback JSON");
+      return await res.json();
+    };
+
+    const fetchSheet = async () => {
+      const url = APPS_SCRIPT_URL;
+      if (!url) throw new Error("no-url");
+      const response = await fetch(url, { cache: "no-store" });
+      if (!response.ok) throw new Error(`Failed: ${response.status}`);
+      return await response.json();
+    };
+
+    const hasSheet = Boolean(APPS_SCRIPT_URL);
+    const jsonPromise = fetchFoldersJson();
+    const sheetPromise = hasSheet ? fetchSheet() : null;
+
+    // No data yet: pick whichever succeeds first to kill the skeleton quickly.
+    if (!fastFolders) {
+      const payload = await firstFulfilled([jsonPromise, sheetPromise].filter(Boolean));
+      applyFolders(payload?.folders || []);
+    } else {
+      // Data already visible: update in background (no waiting).
+      jsonPromise.then((p) => applyFolders(p?.folders || [])).catch(() => {});
     }
 
-    try {
-      const fallback = await fetch("/folders.json", { cache: "no-store" });
-      if (!fallback.ok) throw new Error("fallback failed");
-      return await fallback.json();
-    } catch {
-      if (localData) return { folders: JSON.parse(localData) };
-      throw new Error("Semua sumber data gagal dimuat.");
+    // Background upgrade: when Sheet finishes, update again (if different).
+    if (hasSheet && sheetPromise) {
+      sheetPromise.then((p) => applyFolders(p?.folders || [])).catch(() => {});
     }
+  } catch (error) {
+    // Only show blocking error if we had nothing to render.
+    if (!fastFolders) {
+      folderGrid.innerHTML = `<div class="empty-state">Gagal memuat produk. Silakan refresh.</div>`;
+    }
+    console.error(error);
   }
 }
 
 function renderSkeleton() {
   folderGrid.innerHTML = `
-    <div class="skeleton-grid">
+    <div class="skeleton-wrap">
       <div class="skeleton-card"></div>
-      <div class="skeleton-card"></div>
-      <div class="skeleton-card"></div>
-      <div class="skeleton-card"></div>
-      <div class="skeleton-card"></div>
-      <div class="skeleton-card"></div>
+      <div class="skeleton-card" style="animation-delay: 0.15s; opacity: 0.8;"></div>
+      <div class="skeleton-card" style="animation-delay: 0.3s; opacity: 0.5;"></div>
     </div>
   `;
-}
-
-function renderWithTransition() {
-  folderGrid.classList.add("fade-out");
-  requestAnimationFrame(() => {
-    render();
-    folderGrid.classList.remove("fade-out");
-    folderGrid.classList.add("fade-in");
-    setTimeout(() => folderGrid.classList.remove("fade-in"), 180);
-  });
 }
 
 function render() {
@@ -144,73 +171,103 @@ function render() {
   const filtered = getFilteredFolders();
 
   if (filtered.length === 0) {
-    folderGrid.innerHTML = `<div class="empty-state">Produk tidak ditemukan. Coba kata kunci lain ya 👀</div>`;
+    folderGrid.innerHTML = `<div class="empty-state">Pencarian tidak ditemukan.</div>`;
     return;
   }
 
-  filtered.forEach((folder, folderIndex) => {
+  filtered.forEach((folder) => {
     const card = folderTpl.content.firstElementChild.cloneNode(true);
-    card.style.transitionDelay = `${folderIndex * 60}ms`;
     const head = card.querySelector(".folder-head");
-
-    card.querySelector(".folder-id").textContent = folder.title || `Folder ${folder.id}`;
+    card.querySelector(".folder-id").textContent = `FOLDER ${folder.id}`;
     card.querySelector(".folder-meta").textContent = `${folder.products.length} produk`;
 
     const collage = card.querySelector(".folder-collage");
-    const previewImages = folder.products.filter((p) => Boolean(p.image)).slice(0, 3);
-    if (previewImages.length) {
-      previewImages.forEach((product) => {
+    const previewImages = folder.products.filter(p => Boolean(p.image)).slice(0, 3);
+    if (previewImages.length > 0) {
+      previewImages.forEach(p => {
         const img = document.createElement("img");
-        img.src = product.image;
+        img.src = p.image;
+        img.loading = "lazy";
+        img.decoding = "async";
         img.className = "collage-img";
-        img.alt = "";
         collage.appendChild(img);
       });
+    } else {
+      collage.style.display = "none";
     }
 
     const productGrid = card.querySelector(".product-grid");
-    folder.products.forEach((product, productIndex) => {
-      const productId = product.originalId || product.id;
+    folder.products.forEach((product) => {
       const item = productTpl.content.firstElementChild.cloneNode(true);
-      item.id = `product-${productId}`;
-      item.style.transitionDelay = `${productIndex * 70}ms`;
-
+      item.id = `product-${product.id}`;
       const image = item.querySelector(".product-image");
-      image.dataset.src = product.image || "";
-      image.alt = product.name || "Produk";
+      image.src = product.image || "";
+      image.alt = product.name;
 
-      item.querySelector(".product-name").textContent = product.name || "Tanpa Nama";
+      item.querySelector(".product-name").textContent = product.name;
+
       const labelEl = item.querySelector(".product-label");
       const labelText = product.label || "Featured";
       labelEl.textContent = labelText;
-      labelEl.className = `product-label ${getLabelVariant(labelText)}`;
+      labelEl.className = "product-label " + getLabelVariant(labelText);
 
-      item.querySelector(".product-price").textContent = product.price || "Lihat detail";
-      item.querySelector(".product-description").textContent = product.description || "Produk rekomendasi pilihan Novaa.";
+      item.querySelector(".product-price").textContent = product.price;
+      item.querySelector(".product-description").textContent = product.description;
 
       const buy = item.querySelector(".buy-btn");
-      buy.href = product.affiliateUrl || "#";
+      buy.href = product.affiliateUrl;
 
       const favBtn = item.querySelector(".fav-btn");
       const goFolderBtn = item.querySelector(".go-folder-btn");
-      syncFavoriteButtonState(favBtn, productId);
+      
+      const productId = product.id || product.originalId; 
+      // Using productId from original folder if we injected it, or its own id
+      const targetId = product.originalId || product.id; 
+
+      if (state.favorites.has(targetId)) {
+        favBtn.classList.add("active");
+      } else {
+        favBtn.classList.remove("active");
+      }
 
       favBtn.addEventListener("click", () => {
-        toggleFavorite(productId, favBtn);
+        if (state.favorites.has(targetId)) {
+          state.favorites.delete(targetId);
+          favBtn.classList.remove("active");
+        } else {
+          state.favorites.add(targetId);
+          favBtn.classList.add("active");
+        }
+        localStorage.setItem("novaa_favorites", JSON.stringify([...state.favorites]));
+        // Re-render if we are in showFavorites mode so removed items disappear? 
+        // Better UX to just leave it until they close, but for now we just change icon.
       });
 
       if (product.originalFolderId) {
-        goFolderBtn.hidden = false;
+        goFolderBtn.style.display = "";
         goFolderBtn.addEventListener("click", () => {
+          // Go back to normal mode, open folder, scroll
           state.showFavorites = false;
+          favToggle.classList.remove("active");
           state.openFolderIds.add(product.originalFolderId);
-          searchInput.value = "";
-          state.query = "";
-          syncModeUI();
-          renderWithTransition();
+          
+          // Clear query
+          if (state.query) {
+             state.query = "";
+             searchInput.value = "";
+          }
+
+          render();
+
+          // Scroll to product
           setTimeout(() => {
-            document.getElementById(`product-${productId}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
-          }, 220);
+            const target = document.getElementById(`product-${targetId}`);
+            if (target) {
+              target.scrollIntoView({ behavior: "smooth", block: "center" });
+              target.style.outline = "2px solid rgba(255,255,255,.5)";
+              setTimeout(() => (target.style.outline = "none"), 2000);
+            }
+          }, 150);
         });
       }
 
@@ -218,149 +275,81 @@ function render() {
     });
 
     head.addEventListener("click", () => {
-      if (state.openFolderIds.has(folder.id)) state.openFolderIds.delete(folder.id);
-      else state.openFolderIds.add(folder.id);
-      renderWithTransition();
+      if (state.openFolderIds.has(folder.id)) {
+        state.openFolderIds.delete(folder.id);
+      } else {
+        state.openFolderIds.add(folder.id);
+      }
+      render();
     });
 
-    if (state.openFolderIds.has(folder.id) || state.showFavorites) {
+    if (state.openFolderIds.has(folder.id)) {
       card.classList.add("open");
     }
 
     folderGrid.appendChild(card);
   });
-
-  setupObservers();
-  updateFavoriteCounter();
-  syncModeUI();
 }
 
 function getFilteredFolders() {
   if (state.showFavorites) {
     const favProducts = [];
     state.folders.forEach((folder) => {
-      folder.products.forEach((product) => {
-        if (state.favorites.has(product.id)) {
-          favProducts.push({ ...product, originalFolderId: folder.id, originalId: product.id });
+      folder.products.forEach((p) => {
+        if (state.favorites.has(p.id)) {
+          favProducts.push({ ...p, originalFolderId: folder.id, originalId: p.id });
         }
       });
     });
 
-    if (!favProducts.length) {
-      return [{ id: "favorites-empty", title: "Favorit Saya", products: [] }];
+    if (favProducts.length === 0) {
+      return [{
+        id: "FAV",
+        title: "Belum Ada Favorit",
+        description: "Produk yang Anda simpan akan muncul di sini.",
+        products: []
+      }];
     }
 
-    return [{ id: "favorites", title: "Favorit Saya", products: favProducts }];
+    return [{
+      id: "FAVORITES",
+      title: "Produk Tersimpan",
+      description: "Daftar semua produk favorit Anda.",
+      products: favProducts
+    }];
   }
 
-  if (!state.query) return state.folders;
+  if (!state.query) {
+    return state.folders;
+  }
 
   return state.folders
     .map((folder) => {
-      const folderText = [folder.title, folder.id, folder.description].filter(Boolean).join(" ").toLowerCase();
-      const folderMatch = folderText.includes(state.query);
+      const folderMatch = [folder.title, folder.id, folder.description]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase()
+        .includes(state.query);
 
-      const products = folder.products.filter((product) =>
-        [product.name, product.description, product.label, product.price].filter(Boolean).join(" ").toLowerCase().includes(state.query)
-      );
+      const products = folder.products.filter((product) => {
+        const productText = [product.name, product.description, product.label, product.price]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase();
+        return productText.includes(state.query);
+      });
 
-      if (folderMatch) return folder;
-      if (products.length) return { ...folder, products };
+      if (folderMatch) {
+        return folder;
+      }
+
+      if (products.length > 0) {
+        return { ...folder, products };
+      }
+
       return null;
     })
     .filter(Boolean);
-}
-
-function syncFavoriteButtonState(button, productId) {
-  const active = state.favorites.has(productId);
-  button.classList.toggle("active", active);
-  button.textContent = active ? "❤️" : "♡";
-}
-
-function toggleFavorite(productId, triggerButton) {
-  const currentlyActive = state.favorites.has(productId);
-  if (currentlyActive) {
-    state.favorites.delete(productId);
-  } else {
-    state.favorites.add(productId);
-    showToast("❤️ Ditambahkan ke favorit!");
-  }
-
-  localStorage.setItem(FAVORITES_KEY, JSON.stringify([...state.favorites]));
-  syncFavoriteButtonState(triggerButton, productId);
-  updateFavoriteCounter();
-
-  if (state.showFavorites && currentlyActive) {
-    renderWithTransition();
-  }
-}
-
-function updateFavoriteCounter() {
-  favCount.textContent = String(state.favorites.size);
-}
-
-function showToast(message) {
-  toast.textContent = message;
-  toast.classList.add("show");
-  clearTimeout(toastTimeout);
-  toastTimeout = setTimeout(() => toast.classList.remove("show"), 1600);
-}
-
-function setupObservers() {
-  revealObserver?.disconnect();
-  imageObserver?.disconnect();
-
-  revealObserver = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        if (!entry.isIntersecting) return;
-        entry.target.classList.add("visible");
-        revealObserver.unobserve(entry.target);
-      });
-    },
-    { threshold: 0.12 }
-  );
-
-  imageObserver = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        if (!entry.isIntersecting) return;
-        const img = entry.target;
-        const src = img.dataset.src;
-        if (src) {
-          img.src = src;
-          img.onload = () => img.classList.add("loaded");
-        }
-        imageObserver.unobserve(img);
-      });
-    },
-    { rootMargin: "160px 0px" }
-  );
-
-  document.querySelectorAll(".reveal-item").forEach((el) => revealObserver.observe(el));
-  document.querySelectorAll(".product-image").forEach((img) => imageObserver.observe(img));
-}
-
-function onScroll() {
-  if (ticking) return;
-  ticking = true;
-
-  requestAnimationFrame(() => {
-    const currentY = window.scrollY || 0;
-    const isScrollingDown = currentY > lastY;
-
-    topbar.classList.toggle("hide", isScrollingDown && currentY > 120);
-    backToTop.classList.toggle("show", currentY > 300);
-
-    lastY = currentY;
-    ticking = false;
-  });
-}
-
-function syncModeUI() {
-  favToggle.classList.toggle("active", state.showFavorites);
-  tabFav.classList.toggle("active", state.showFavorites);
-  tabAll.classList.toggle("active", !state.showFavorites);
 }
 
 function hydrateFromHash() {
@@ -369,24 +358,16 @@ function hydrateFromHash() {
   if (!folderId) return;
 
   state.openFolderIds.add(folderId);
-  renderWithTransition();
 
-  if (!productId) return;
-  setTimeout(() => {
-    document.getElementById(`product-${productId}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
-  }, 260);
-}
-
-function initTheme() {
-  const stored = localStorage.getItem(THEME_KEY);
-  const systemPrefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-  const isDark = stored ? stored === "dark" : systemPrefersDark;
-  document.body.classList.toggle("dark", isDark);
-  updateThemeToggle(isDark);
-}
-
-function updateThemeToggle(isDark) {
-  themeToggle.textContent = isDark ? "☀️" : "🌙";
+  window.requestAnimationFrame(() => {
+    if (!productId) return;
+    const target = document.getElementById(`product-${productId}`);
+    if (target) {
+      target.scrollIntoView({ behavior: "smooth", block: "center" });
+      target.style.outline = "2px solid rgba(255,255,255,.5)";
+      setTimeout(() => (target.style.outline = "none"), 2000);
+    }
+  });
 }
 
 function getLabelVariant(label) {
