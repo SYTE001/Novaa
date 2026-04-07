@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin — Novaa</title>
+  <link rel="stylesheet" href="./admin.css" />
+</head>
+<body>
+  <div class="admin-shell">
+    <header class="admin-top">
+      <div class="admin-top-left">
+        <p class="eyebrow">Admin Dashboard</p>
+        <h1>Folder &amp; Product Manager</h1>
+      </div>
+      <div class="admin-top-right">
+        <div class="sync-bar">
+          <span id="syncStatus" class="sync-status">Memuat…</span>
+          <button id="syncBtn" class="primary sync-btn">🔄 Sync ke Sheet</button>
+          <button id="scriptUrlBtn" class="ghost" title="Set Apps Script URL">⚙️ URL Script</button>
+        </div>
+        <div class="admin-actions">
+          <button id="addFolderBtn" class="ghost">+ Folder</button>
+          <button id="addProductBtn" class="primary">+ Produk</button>
+        </div>
+      </div>
+    </header>
+
+    <section id="adminContent" class="admin-content"></section>
+  </div>
+
+  <dialog id="editDialog" class="dialog">
+    <form method="dialog" id="editForm">
+      <h2 id="dialogTitle"></h2>
+      <div id="formFields" class="form-grid"></div>
+      <menu>
+        <button value="cancel" class="ghost" type="button" id="cancelBtn">Batal</button>
+        <button value="save" class="primary" type="submit">Simpan</button>
+      </menu>
+    </form>
+  </dialog>
+
+  <script src="./admin.js" defer></script>
+</body>
+</html>
