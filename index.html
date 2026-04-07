@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Novaa — Koleksi Afiliasi</title>
+  <meta name="description" content="Katalog produk berbasis koleksi modern." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">Rekomendasi Produk</p>
+        <h1>Koleksi Pilihan</h1>
+      </div>
+      <div style="display:flex; gap:0.6rem; align-items:center;">
+        <label class="search-wrap" for="searchInput" style="flex:1;">
+          <span>⌕</span>
+          <input id="searchInput" type="search" placeholder="Cari koleksi atau produk…" autocomplete="off" />
+        </label>
+        <button id="favToggle" class="fav-toggle" aria-label="Lihat Favorit">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+        </button>
+      </div>
+    </header>
+
+    <main>
+      <section id="folderGrid" class="folder-grid" aria-live="polite"></section>
+    </main>
+  </div>
+
+  <template id="folderTemplate">
+    <article class="folder-card">
+      <button class="folder-head" type="button">
+        <div class="folder-preview">
+          <div class="folder-collage"></div>
+        </div>
+        <div class="folder-info">
+          <h2 class="folder-id"></h2>
+          <span class="folder-meta"></span>
+        </div>
+        <div class="folder-chevron">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </div>
+      </button>
+      <div class="product-wrap">
+        <div class="product-wrap-inner">
+          <div class="product-grid"></div>
+        </div>
+      </div>
+    </article>
+  </template>
+
+  <template id="productTemplate">
+    <article class="product-card">
+      <img class="product-image" alt="" loading="lazy" />
+      <div class="product-body">
+        <div class="product-row">
+          <h3 class="product-name"></h3>
+          <span class="product-label"></span>
+        </div>
+        <p class="product-price"></p>
+        <p class="product-description"></p>
+        <div class="product-actions">
+          <a class="buy-btn" target="_blank" rel="noopener">Beli Sekarang</a>
+          <button class="go-folder-btn" type="button" style="display:none;">📂 Folder</button>
+          <button class="fav-btn" type="button" aria-label="Favorit">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+          </button>
+        </div>
+      </div>
+    </article>
+  </template>
+
+  <script src="app.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,118 @@
+{
+  "folders": [
+    {
+      "id": "tech-01",
+      "title": "Creator Desk Essentials",
+      "description": "High-performing setup picks for creators and remote workers.",
+      "hidden": false,
+      "products": [
+        {
+          "id": "tech-keyboard-1",
+          "name": "Low-Profile Wireless Keyboard",
+          "image": "https://images.unsplash.com/photo-1541140532154-b024d705b90a?auto=format&fit=crop&w=1200&q=80",
+          "price": "$89",
+          "label": "Best Seller",
+          "description": "Snappy low-latency typing with premium aluminum frame.",
+          "affiliateUrl": "https://example.com/keyboard",
+          "hidden": false
+        },
+        {
+          "id": "tech-light-2",
+          "name": "RGB Edge Desk Light",
+          "image": "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1200&q=80",
+          "price": "$49",
+          "label": "Flash Sale",
+          "description": "Bias lighting that reduces eye strain and upgrades vibe instantly.",
+          "affiliateUrl": "https://example.com/light",
+          "hidden": false
+        },
+        {
+          "id": "tech-stand-3",
+          "name": "Magnetic Phone Stand",
+          "image": "https://images.unsplash.com/photo-1556656793-08538906a9f8?auto=format&fit=crop&w=1200&q=80",
+          "price": "$25",
+          "label": "Top Rated",
+          "description": "Solid aluminum stand with adjustable angle for all-day calls.",
+          "affiliateUrl": "https://example.com/stand",
+          "hidden": false
+        }
+      ]
+    },
+    {
+      "id": "beauty-01",
+      "title": "Night Reset Skincare",
+      "description": "Minimal routine picks for clean, hydrated skin overnight.",
+      "hidden": false,
+      "products": [
+        {
+          "id": "beauty-cleanser-1",
+          "name": "Gentle Gel Cleanser",
+          "image": "https://images.unsplash.com/photo-1625772452859-1c03d5bf1137?auto=format&fit=crop&w=1200&q=80",
+          "price": "$18",
+          "label": "Best Seller",
+          "description": "Removes SPF and makeup without stripping the skin barrier.",
+          "affiliateUrl": "https://example.com/cleanser",
+          "hidden": false
+        },
+        {
+          "id": "beauty-serum-2",
+          "name": "Hydrating HA Serum",
+          "image": "https://images.unsplash.com/photo-1611080541599-8c6dbde6ed28?auto=format&fit=crop&w=1200&q=80",
+          "price": "$29",
+          "label": "Editor Pick",
+          "description": "Deep hydration boost for dry, stressed, and tired skin.",
+          "affiliateUrl": "https://example.com/serum",
+          "hidden": false
+        },
+        {
+          "id": "beauty-cream-3",
+          "name": "Barrier Repair Night Cream",
+          "image": "https://images.unsplash.com/photo-1571781926291-c477ebfd024b?auto=format&fit=crop&w=1200&q=80",
+          "price": "$34",
+          "label": "Flash Sale",
+          "description": "Locks in moisture with peptides and ceramides overnight.",
+          "affiliateUrl": "https://example.com/cream",
+          "hidden": false
+        }
+      ]
+    },
+    {
+      "id": "fashion-01",
+      "title": "Minimal Workwear Capsule",
+      "description": "Sharp essentials for polished office-ready outfits.",
+      "hidden": false,
+      "products": [
+        {
+          "id": "fashion-shirt-1",
+          "name": "Premium Oxford Shirt",
+          "image": "https://images.unsplash.com/photo-1617127365659-c47fa864d8bc?auto=format&fit=crop&w=1200&q=80",
+          "price": "$39",
+          "label": "Top Rated",
+          "description": "Crisp silhouette with breathable cotton for long workdays.",
+          "affiliateUrl": "https://example.com/shirt",
+          "hidden": false
+        },
+        {
+          "id": "fashion-pants-2",
+          "name": "Stretch Chino Pants",
+          "image": "https://images.unsplash.com/photo-1473966968600-fa801b869a1a?auto=format&fit=crop&w=1200&q=80",
+          "price": "$52",
+          "label": "Best Seller",
+          "description": "Tailored comfort fit with wrinkle-resistant finish.",
+          "affiliateUrl": "https://example.com/chino",
+          "hidden": false
+        },
+        {
+          "id": "fashion-shoes-3",
+          "name": "Leather Penny Loafers",
+          "image": "https://images.unsplash.com/photo-1549298916-b41d501d3772?auto=format&fit=crop&w=1200&q=80",
+          "price": "$74",
+          "label": "Limited",
+          "description": "Classic slip-ons with cushioned sole and premium shine.",
+          "affiliateUrl": "https://example.com/loafers",
+          "hidden": false
+        }
+      ]
+    }
+  ]
+}
